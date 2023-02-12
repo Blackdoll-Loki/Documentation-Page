@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./styles.css" />
+    <title>Document</title>
+  </head>
+  <body>
+    <main id="main-doc">
+      <section class="main-section" id="Class_basic_syntax">
+        <header>Class basic syntax</header>
+        <article>
+          <p>
+            In object-oriented programming, a class is an extensible
+            program-code-template for creating objects, providing initial values
+            for state (member variables) and implementations of behavior (member
+            functions or methods).
+          </p>
+          <p>
+            In practice, we often need to create many objects of the same kind,
+            like users, or goods or whatever.
+          </p>
+          <p>
+            As we already know from the chapter Constructor, operator "new", new
+            function can help with that.
+          </p>
+          <p>
+            But in the modern JavaScript, there’s a more advanced “class”
+            construct, that introduces great new features which are useful for
+            object-oriented programming.
+          </p>
+        </article>
+      </section>
+      <section class="main-section" id="The_Class_syntax">
+        <header>The Class syntax</header>
+        <article>
+          <p>The basic syntax is:</p>
+          <code>
+            <pre>
+              class MyClass {
+                // class methods
+                constructor() { ... }
+                method1() { ... }
+                method2() { ... }
+                method3() { ... }
+                ...
+              }
+            </pre>
+          </code>
+          <p>
+            Then use new MyClass() to create a new object with all the listed
+            methods.
+          </p>
+          <p>
+            The constructor() method is called automatically by new, so we can
+            initialize the object there.
+          </p>
+          <p>For example:</p>
+          <code>
+            <pre>
+              class User {
+
+              constructor(name) {
+                this.name = name;
+              }
+
+              sayHi() {
+                alert(this.name);
+              }
+
+              }
+
+              // Usage:
+              let user = new User("John");
+              user.sayHi();
+            </pre>
+          </code>
+          <p>When new User("John") is called:</p>
+          <ol>
+            <li>A new object is created.</li>
+            <li>
+              The constructor runs with the given argument and assigns it to
+              this.name.
+            </li>
+          </ol>
+          <p>…Then we can call object methods, such as user.sayHi().</p>
+        </article>
+      </section>
+      <section class="main-section" id="What_is_a_class?">
+        <header>What is a class?</header>
+        <article>
+          <p>
+            So, what exactly is a class? That’s not an entirely new
+            language-level entity, as one might think.
+          </p>
+          <p>
+            Let’s unveil any magic and see what a class really is. That’ll help
+            in understanding many complex aspects.
+          </p>
+          <p>In JavaScript, a class is a kind of function.</p>
+          <p>Here, take a look:</p>
+          <code>
+            <pre>
+              class User {
+                constructor(name) { this.name = name; }
+                sayHi() { alert(this.name); }
+              }
+
+              // proof: User is a function
+              alert(typeof User); // function
+            </pre>
+          </code>
+          <p>What class User {...} construct really does is:</p>
+          <ol>
+            <li>
+              Creates a function named User, that becomes the result of the
+              class declaration. The function code is taken from the constructor
+              method (assumed empty if we don’t write such method).
+            </li>
+            <li>Stores class methods, such as sayHi, in User.prototype.</li>
+          </ol>
+          <p>
+            After new User object is created, when we call its method, it’s
+            taken from the prototype, just as described in the chapter
+            F.prototype. So the object has access to class methods.
+          </p>
+          <p>We can illustrate the result of class User declaration as:</p>
+          <img src="http://www.w3.org/2000/svg" alt="illustration" />
+          <p>Here’s the code to introspect it:</p>
+          <code>
+            <pre>
+              class User {
+                constructor(name) { this.name = name; }
+                sayHi() { alert(this.name); }
+              }
+
+              // class is a function
+              alert(typeof User); // function
+
+              // ...or, more precisely, the constructor method
+              alert(User === User.prototype.constructor); // true
+
+              // The methods are in User.prototype, e.g:
+              alert(User.prototype.sayHi); // the code of the sayHi method
+
+              // there are exactly two methods in the prototype
+              alert(Object.getOwnPropertyNames(User.prototype)); // constructor, sayHi
+            </pre>
+          </code>
+        </article>
+      </section>
+      <section class="main-section" id="Not_just_a_syntactic_sugar">
+        <header>Not just a syntactic sugar</header>
+        <article>
+          <p>
+            Sometimes people say that class is a “syntactic sugar” (syntax that
+            is designed to make things easier to read, but doesn’t introduce
+            anything new), because we could actually declare the same thing
+            without using the class keyword at all:
+          </p>
+          <code>
+            <pre>
+              // rewriting class User in pure functions
+
+              // 1. Create constructor function
+              function User(name) {
+                this.name = name;
+              }
+              // a function prototype has "constructor" property by default,
+              // so we don't need to create it
+
+              // 2. Add the method to prototype
+              User.prototype.sayHi = function() {
+                alert(this.name);
+              };
+
+              // Usage:
+              let user = new User("John");
+              user.sayHi();
+            </pre>
+          </code>
+          <p>
+            The result of this definition is about the same. So, there are
+            indeed reasons why class can be considered a syntactic sugar to
+            define a constructor together with its prototype methods.
+          </p>
+          <p>Still, there are important differences.</p>
+          <ol>
+            <li>
+              <p>
+                First, a function created by class is labelled by a special
+                internal property [[IsClassConstructor]]: true. So it’s not
+                entirely the same as creating it manually.
+              </p>
+              <p>
+                The language checks for that property in a variety of places.
+                For example, unlike a regular function, it must be called with
+                new:
+              </p>
+              <code>
+                <pre>
+                  class User {
+                  constructor() {}
+                }
+
+                alert(typeof User); // function
+                User(); // Error: Class constructor User cannot be invoked without 'new'
+                </pre>
+              </code>
+              <p>
+                Also, a string representation of a class constructor in most
+                JavaScript engines starts with the “class…”
+              </p>
+              <code>
+                <pre>
+                  class User {
+                    constructor() {}
+                  }
+
+                  alert(User); // class User { ... }
+                </pre>
+              </code>
+              <p>There are other differences, we’ll see them soon.</p>
+            </li>
+            <li>
+              <p>
+                Class methods are non-enumerable. A class definition sets
+                enumerable flag to false for all methods in the "prototype".
+              </p>
+              <p>
+                That’s good, because if we for..in over an object, we usually
+                don’t want its class methods.
+              </p>
+            </li>
+            <li>
+              <p>
+                Classes always use strict. All code inside the class construct
+                is automatically in strict mode.
+              </p>
+            </li>
+          </ol>
+          <p>
+            Besides, class syntax brings many other features that we’ll explore
+            later.
+          </p>
+        </article>
+      </section>
+      <section class="main-section" id="Class_Expression">
+        <header>Class Expression</header>
+        <article>
+          <p>
+            Just like functions, classes can be defined inside another
+            expression, passed around, returned, assigned, etc.
+          </p>
+          <p>Here’s an example of a class expression:</p>
+          <code>
+            <pre>
+              let User = class {
+                sayHi() {
+                  alert("Hello");
+                }
+              };
+            </pre>
+          </code>
+          <p>
+            Similar to Named Function Expressions, class expressions may have a
+            name.
+          </p>
+          <p>
+            If a class expression has a name, it’s visible inside the class
+            only:
+          </p>
+          <code>
+            <pre>
+              // "Named Class Expression"
+              // (no such term in the spec, but that's similar to Named Function Expression)
+              let User = class MyClass {
+                sayHi() {
+                  alert(MyClass); // MyClass name is visible only inside the class
+                }
+              };
+
+              new User().sayHi(); // works, shows MyClass definition
+
+              alert(MyClass); // error, MyClass name isn't visible outside of the class
+            </pre>
+          </code>
+          <p>We can even make classes dynamically “on-demand”, like this:</p>
+          <code>
+            <pre>
+              function makeClass(phrase) {
+                // declare a class and return it
+                return class {
+                  sayHi() {
+                    alert(phrase);
+                  }
+                };
+              }
+
+              // Create a new class
+              let User = makeClass("Hello");
+
+              new User().sayHi(); // Hello
+            </pre>
+          </code>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>
